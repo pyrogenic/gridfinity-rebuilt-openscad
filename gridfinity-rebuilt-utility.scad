@@ -332,7 +332,7 @@ module block_base_hole(style_hole, o=0) {
 module refined_hole() {
     /**
     * Refined hole based on Printables @grizzie17's Gridfinity Refined
-    * https://www.printables.com/model/413761-gridfinity-refined
+    *  
     */
 
     // Meassured magnet hole diameter to be 5.86mm (meassured in fusion360
@@ -608,8 +608,12 @@ module profile_cutter(h, l, s) {
                     mirror([0,1]) square(2*scoop);
                 }
             } else mirror([1,0]) square(0.1);
-            translate([l-scoop-2*r_f2,-1])
-            square([-(l-scoop-2*r_f2),2*h]);
+            
+            let(q=l-scoop-2*r_f2)
+            if(q<0) {
+                translate([q,-1])
+                square([-(q),2*h]);
+            }
 
             translate([0,h])
             square([2*l,scoop]);

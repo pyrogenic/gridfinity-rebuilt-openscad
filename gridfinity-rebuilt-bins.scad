@@ -71,7 +71,7 @@ style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 // how should the top lip act
 style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
 // scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop.
-scoop = 1; //[0:0.1:1]
+scoop = 1; //[0:0.01:1]
 // only cut magnet/screw holes at the corners of the bin to save uneccesary print time
 only_corners = false;
 
@@ -87,17 +87,16 @@ div_base_y = 0;
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") {
+echo(str("gridfinityInit(gridx=",gridx,", gridy=",gridy,", height(gridz=",gridz,", gridz_define=",gridz_define,", style_lip=",style_lip,", enable_zsnap=",enable_zsnap,"), height_internal=",height_internal,", sl=", style_lip,") {"))    
 gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, sl=style_lip) {
-
     if (divx > 0 && divy > 0) {
-
         cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
-
     } else if (cdivx > 0 && cdivy > 0) {
-
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
     }
 }
+echo(str("}"));
+echo(str("gridfinityBase(gridx=",gridx,", gridy=",gridy,", l_grid=",l_grid,", div_base_x=",div_base_x,", div_base_y=",div_base_y,", style_hole=",style_hole,", only_corners=",only_corners,");"));
 gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners);
 }
 
