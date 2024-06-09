@@ -87,16 +87,17 @@ div_base_y = 0;
 // ===== IMPLEMENTATION ===== //
 
 color("tomato") {
-echo(str("gridfinityInit(gridx=",gridx,", gridy=",gridy,", height(gridz=",gridz,", gridz_define=",gridz_define,", style_lip=",style_lip,", enable_zsnap=",enable_zsnap,"), height_internal=",height_internal,", sl=", style_lip,") {"))    
 gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, sl=style_lip) {
+
     if (divx > 0 && divy > 0) {
+
         cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
+
     } else if (cdivx > 0 && cdivy > 0) {
+
         cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
     }
 }
-echo(str("}"));
-echo(str("gridfinityBase(gridx=",gridx,", gridy=",gridy,", l_grid=",l_grid,", div_base_x=",div_base_x,", div_base_y=",div_base_y,", style_hole=",style_hole,", only_corners=",only_corners,");"));
 gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners);
 }
 

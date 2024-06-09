@@ -32,9 +32,11 @@ module pattern_linear(x = 1, y = 1, sx = 0, sy = 0) {
     children();
 }
 
-module pattern_circular(n=2) {
+module pattern_circular(n=2, offset=0, run=undef) {
+    let(run=is_undef(run) ? n : run)
     for (i = [1:n])
     rotate(i*360/n)
+    if (offset < i && i <= offset + run)
     children();
 }
 

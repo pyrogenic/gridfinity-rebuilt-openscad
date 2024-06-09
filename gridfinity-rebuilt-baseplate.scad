@@ -59,8 +59,8 @@ style_hole = 2; // [0:none, 1:countersink, 2:counterbore]
 // ===== IMPLEMENTATION ===== //
 screw_together = (style_plate == 3 || style_plate == 4);
 
-color("tomato")
-gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
+//color("tomato")
+//gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
 
 
 // ===== CONSTRUCTION ===== //
@@ -147,8 +147,8 @@ module cutter_weight() {
         }
     }
 }
-module hole_pattern(){
-    pattern_circular(4)
+module hole_pattern(offset = 0, run = undef){
+    pattern_circular(4, offset, run)
     translate([l_grid/2-d_hole_from_side, l_grid/2-d_hole_from_side, 0]) {
         render();
         children();

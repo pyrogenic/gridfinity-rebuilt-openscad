@@ -120,7 +120,7 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
 // initialize gridfinity
 // sl:  lip style of this bin.
 //      0:Regular lip, 1:Remove lip subtractively, 2:Remove lip and retain height
-module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
+module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0, extend=[0, 0], extend_offset=[0, 0]) {
     $gxx = gx;
     $gyy = gy;
     $dh = h;
@@ -132,7 +132,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0) {
         children();
     }
     color("royalblue")
-    block_wall(gx, gy, l) {
+    block_wall(gx, gy, l, extend, extend_offset) {
         if ($style_lip == 0) profile_wall(h);
         else profile_wall2(h);
     }
@@ -433,9 +433,9 @@ module profile_wall2(height_mm) {
     square([d_wall, height_mm]);
 }
 
-module block_wall(gx, gy, l) {
-    translate([0,0,h_base])
-    sweep_rounded(gx*l-2*r_base-0.5-0.001, gy*l-2*r_base-0.5-0.001)
+module block_wall(gx, gy, l, extend=[0, 0], extend_offset=[0, 0]) {
+    translate([extend_offset.x, extend_offset.y, h_base])
+    sweep_rounded(extend.x + gx*l-2*r_base-0.5-0.001, extend.y + gy*l-2*r_base-0.5-0.001)
     children();
 }
 
@@ -615,6 +615,7 @@ module profile_cutter(h, l, s) {
                 square([-(q),2*h]);
             }
 
+            if (scoop > 0)
             translate([0,h])
             square([2*l,scoop]);
         }
