@@ -71,12 +71,35 @@ function height (z,d=0,l=0,enable_zsnap=true) =
 //          set n_div values to 0 for a solid bin
 // style_tab:   tab style for all compartments. see cut()
 // scoop_weight:    scoop toggle for all compartments. see cut()
-module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1) {
+module cutEqual(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1, tab_height=d_tabh) {
     for (i = [1:n_divx])
     for (j = [1:n_divy])
-    cut((i-1)*$gxx/n_divx,(j-1)*$gyy/n_divy, $gxx/n_divx, $gyy/n_divy, style_tab, scoop_weight);
+    let(x=(i-1)*$gxx/n_divx,
+        y=(j-1)*$gyy/n_divy,
+        w=$gxx/n_divx,
+        h=$gyy/n_divy)
+    cut(x, y, w, h, style_tab, scoop_weight, tab_height=tab_height);
 }
 
+module cutProgression(n_divx=1, n_divy=1, style_tab=1, scoop_weight=1, tab_height=d_tabh, x_scale=0.5) {
+    _cutProgression(x = 0, extra_w = x_scale*$gxx, i = 1, n_divx, n_divy, style_tab, scoop_weight, tab_height, x_scale);
+}
+
+module _cutProgression(x, extra_w, i, n_divx, n_divy, style_tab, scoop_weight, tab_height, x_scale) {
+    if (i <= n_divx) {
+        echo(str("_cutProgression: x = ", x, ", i = ", i, ", tab_height = ", tab_height));
+        let(w_base=(1-x_scale)*$gxx/n_divx,
+            w_extra=(n_divx - i)*extra_w/(n_divx - i + 1),
+            w=w_base+w_extra) {
+            for (j = [1:n_divy])
+                let(y=(j-1)*$gyy/n_divy,
+                    h=$gyy/n_divy)
+                cut(x, y, w, h, style_tab, scoop_weight, tab_height=tab_height);
+
+            _cutProgression(x = x + w, extra_w = extra_w - w_extra, i = i + 1, n_divx, n_divy, style_tab, scoop_weight, tab_height, x_scale);
+        }
+    }
+}
 
 // Creates equally divided cylindrical cutouts
 //
@@ -151,6 +174,7 @@ module gridfinityInit(gx, gy, h, h0 = 0, l = l_grid, sl = 0, extend=[0, 0], exte
 // s:   toggle the rounded back corner that allows for easy removal
 
 module cut(x=0, y=0, w=1, h=1, t=1, s=1, tab_width=d_tabw, tab_height=d_tabh) {
+    echo(str("cut: tab_height = ", tab_height));
     translate([0,0,-$dh-h_base])
     cut_move(x,y,w,h)
     block_cutter(clp(x,0,$gxx), clp(y,0,$gyy), clp(w,0,$gxx-x), clp(h,0,$gyy-y), t, s, tab_width, tab_height);

@@ -1,5 +1,3 @@
-include <gridfinity-rebuilt-utility.scad>
-
 // ===== INFORMATION ===== //
 /*
  IMPORTANT: rendering will be better for analyzing the model if fast-csg is enabled. As of writing, this feature is only available in the development builds and not the official release of OpenSCAD, but it makes rendering only take a couple seconds, even for comically large bins. Enable it in Edit > Preferences > Features > fast-csg
@@ -34,12 +32,17 @@ gridx = 3;
 gridy = 2;
 // bin height. See bin height information and "gridz_define" below.
 gridz = 6;
+// wall width. Default: 0.95
+d_wall = 0.95;
 
 /* [Linear Compartments] */
 // number of X Divisions (set to zero to have solid bin)
-divx = 0;
+divx = [0, 0];
 // number of Y Divisions (set to zero to have solid bin)
-divy = 0;
+divy = [0, 0];
+// tab height factor
+tabh = 1; // [0.00:0.01:2.00]
+x_scale = 0; // [0.0:0.1:1.0]
 
 /* [Cylindrical Compartments] */
 // number of cylindrical X Divisions (mutually exclusive to Linear Compartments)
@@ -82,23 +85,27 @@ div_base_x = 0;
 // number of divisions per 1 unit of base along the Y axis. (default 1, only use integers. 0 means automatically guess the right division)
 div_base_y = 0;
 
-
+include <gridfinity-rebuilt-utility.scad>
 
 // ===== IMPLEMENTATION ===== //
 
-color("tomato") {
-gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, sl=style_lip) {
-
-    if (divx > 0 && divy > 0) {
-
-        cutEqual(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop);
-
-    } else if (cdivx > 0 && cdivy > 0) {
-
-        cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
+color("lightgrey")
+{
+    gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, sl=style_lip) {
+        if (divx.x > 0 && divy.x > 0) {
+            cutEqual(n_divx = divx.x, n_divy = divy.x, style_tab = style_tab, scoop_weight = scoop, tab_height = d_tabh*tabh);
+            //cutProgression(n_divx = divx, n_divy = divy, style_tab = style_tab, scoop_weight = scoop, tab_height = d_tabh*tabh, x_scale=x_scale);
+            // cut( 0/12, 0, 8/12, 1, style_tab, tab_height=d_tabh*tabh);
+            // cut( 8/12, 0, 7/12, 1, style_tab, tab_height=d_tabh*tabh);
+            // cut(15/12, 0, 7/12, 1, style_tab, tab_height=d_tabh*tabh);
+            // cut(22/12, 0, 7/12, 1, style_tab, tab_height=d_tabh*tabh);
+            // cut(29/12, 0, 7/12, 1, style_tab, tab_height=d_tabh*tabh);
+        } else if (cdivx > 0 && cdivy > 0) {
+            cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
+        }
     }
-}
-gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners);
+    
+    gridfinityBase(gridx, gridy, l_grid, div_base_x, div_base_y, style_hole, only_corners=only_corners);
 }
 
 
