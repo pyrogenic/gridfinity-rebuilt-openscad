@@ -1,3 +1,5 @@
+d_wall = 0.95;
+
 include <gridfinity-rebuilt-utility.scad>
 
 // ===== INFORMATION ===== //

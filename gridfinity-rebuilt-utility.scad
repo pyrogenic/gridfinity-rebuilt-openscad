@@ -121,8 +121,8 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
     gridx_mm = $gxx*l_grid;
     gridy_mm = $gyy*l_grid;
     padding = 2;
-    cutout_x = gridx_mm - d_wall*2;
-    cutout_y = gridy_mm - d_wall*2;
+    cutout_x = gridx_mm - d_wall()*2;
+    cutout_y = gridy_mm - d_wall()*2;
 
     cut_move(x=0, y=0, w=$gxx, h=$gyy) {
         translate([0,0,-coutout_depth]) {
@@ -444,8 +444,8 @@ module profile_wall(height_mm) {
     translate([r_base - stacking_lip_depth, 0, 0]){
         translate([0, height_mm, 0])
         stacking_lip_chamfered();
-        translate([stacking_lip_depth-d_wall/2, 0, 0])
-        square([d_wall/2, height_mm]);
+        translate([stacking_lip_depth-d_wall()/2, 0, 0])
+        square([d_wall()/2, height_mm]);
     }
 }
 
@@ -454,7 +454,7 @@ module profile_wall2(height_mm) {
     assert(is_num(height_mm))
     translate([r_base,0,0])
     mirror([1,0,0])
-    square([d_wall, height_mm]);
+    square([d_wall(), height_mm]);
 }
 
 module block_wall(gx, gy, l, extend=[0, 0], extend_offset=[0, 0]) {
@@ -465,12 +465,12 @@ module block_wall(gx, gy, l, extend=[0, 0], extend_offset=[0, 0]) {
 
 module block_bottom( h = 2.2, gx, gy, l ) {
     translate([0,0,h_base+0.1])
-    rounded_rectangle(gx*l-0.5-d_wall/4, gy*l-0.5-d_wall/4, h, r_base+0.01);
+    rounded_rectangle(gx*l-0.5-d_wall()/4, gy*l-0.5-d_wall()/4, h, r_base+0.01);
 }
 
 module cut_move_unsafe(x, y, w, h) {
-    xx = ($gxx*l_grid+d_magic);
-    yy = ($gyy*l_grid+d_magic);
+    xx = ($gxx*l_grid+(d_magic()));
+    yy = ($gyy*l_grid+(d_magic()));
     translate([(x)*xx/$gxx,(y)*yy/$gyy,0])
     translate([(-xx+d_div)/2,(-yy+d_div)/2,0])
     translate([(w*xx/$gxx-d_div)/2,(h*yy/$gyy-d_div)/2,0])
@@ -480,9 +480,9 @@ module cut_move_unsafe(x, y, w, h) {
 module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
 
     v_len_tab = tab_height;
-    v_len_lip = d_wall2-d_wall+1.2;
+    v_len_lip = d_wall2-d_wall()+1.2;
     v_cut_tab = tab_height - (2*r_f1)/tan(a_tab);
-    v_cut_lip = d_wall2-d_wall-d_clear;
+    v_cut_lip = d_wall2-d_wall()-d_clear;
     v_ang_tab = a_tab;
     v_ang_lip = 45;
 
@@ -492,11 +492,11 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
     xcutlast = abs(x+w-$gxx)<0.001 && $style_lip == 0;
     zsmall = ($dh+h_base)/7 < 3;
 
-    ylen = h*($gyy*l_grid+d_magic)/$gyy-d_div;
-    xlen = w*($gxx*l_grid+d_magic)/$gxx-d_div;
+    ylen = h*($gyy*l_grid+(d_magic()))/$gyy-d_div;
+    xlen = w*($gxx*l_grid+(d_magic()))/$gxx-d_div;
 
     height = $dh;
-    extent = (abs(s) > 0 && ycutfirst ? d_wall2-d_wall-d_clear : 0);
+    extent = (abs(s) > 0 && ycutfirst ? d_wall2-d_wall()-d_clear : 0);
     tab = (zsmall || t == 5) ? (ycutlast?v_len_lip:0) : v_len_tab;
     ang = (zsmall || t == 5) ? (ycutlast?v_ang_lip:0) : v_ang_tab;
     cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;

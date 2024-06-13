@@ -56,7 +56,7 @@ a_tab = 36;
 h_lip = 3.548;
 
 d_wall2 = r_base-r_c1-d_clear*sqrt(2);
-d_magic = -2*d_clear-2*d_wall+d_div;
+function d_magic() = -2*d_clear-2*d_wall()+d_div;
 
 // Stacking Lip
 // Based on https://gridfinity.xyz/specification/

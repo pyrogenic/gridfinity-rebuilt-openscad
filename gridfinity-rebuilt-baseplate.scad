@@ -1,3 +1,6 @@
+//d_wall = 0.95;
+build_baseplate = false;
+
 include <gridfinity-rebuilt-utility.scad>
 include <standard.scad>
 
@@ -59,8 +62,9 @@ style_hole = 2; // [0:none, 1:countersink, 2:counterbore]
 // ===== IMPLEMENTATION ===== //
 screw_together = (style_plate == 3 || style_plate == 4);
 
-//color("tomato")
-//gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
+if (build_baseplate)
+color("tomato")
+gridfinityBaseplate(gridx, gridy, l_grid, distancex, distancey, style_plate, enable_magnet, style_hole, fitx, fity);
 
 
 // ===== CONSTRUCTION ===== //
