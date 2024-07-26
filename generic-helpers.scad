@@ -23,13 +23,36 @@ module copy_mirror(vec=[0,1,0]) {
     children();
 }
 
-module pattern_linear(x = 1, y = 1, sx = 0, sy = 0) {
+function lerp(values, f_in, f_max = 1) =
+    let(n=len(values) - 1,
+        f=f_in / f_max,
+        i_exact=n * f,
+        i_floor=floor(i_exact))
+        echo(str("n = ", n, ", f_in = ", f_in, ", f = ", f, ", i_exact = ", i_exact, ", i_floor = ", i_floor, ", "))
+    i_floor == i_exact
+        ?
+            values[i_exact]
+        : 
+            values[i_floor] +
+            (values[i_floor + 1] - values[i_floor]) * (i_exact - i_floor);
+
+function pattern_linear_n() = $pattern_linear_x * $pattern_linear_y;
+function pattern_linear_in() = $pattern_linear_j * $pattern_linear_x + $pattern_linear_i;
+function pattern_linear_f() = pattern_linear_in() / (pattern_linear_n() - 1);
+
+module pattern_linear(x = 1, y = 1, sx = 0, sy = 0, r = undef) {
     yy = sy <= 0 ? sx : sy;
     translate([-(x-1)*sx/2,-(y-1)*yy/2,0])
     for (i = [1:ceil(x)])
     for (j = [1:ceil(y)])
     translate([(i-1)*sx,(j-1)*yy,0])
-    children();
+    rotate(is_undef(r) ? 0 : r[(i-1)*ceil(x)+(j-1)]) {
+        $pattern_linear_x = x;
+        $pattern_linear_y = y;
+        $pattern_linear_i = i - 1;
+        $pattern_linear_j = j - 1;
+        children();
+    }
 }
 
 module pattern_circular(n=2, offset=0, run=undef) {

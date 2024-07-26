@@ -33,7 +33,16 @@ gridy = 2;
 // bin height. See bin height information and "gridz_define" below.
 gridz = 6;
 // wall width. Default: 0.95
-d_wall = 0.95;
+Wall_Width = 0.95;
+Nozzle_Diameter = 0.4; // [0.0:0.1:1.0]
+Layer_Height = 0.20; // [0.00:0.01:1.00]
+Overhang = 60; // [0:90]
+Bottom_Thickness = 5;
+function d_wall() = Wall_Width;
+function nozzle() = Nozzle_Diameter;
+function layer_height() = Layer_Height;
+function overhang_angle() = 90-Overhang;
+function bin_bottom_thickness() = layer_height()*Bottom_Thickness;
 
 /* [Linear Compartments] */
 // number of X Divisions (set to zero to have solid bin)
@@ -44,7 +53,7 @@ divy = [0, 0];
 tabh = 1; // [0.00:0.01:2.00]
 x_scale = 0; // [0.0:0.1:1.0]
 
-/* [Cylindrical Compartments] */
+/* [Socket Compartments] */
 // number of cylindrical X Divisions (mutually exclusive to Linear Compartments)
 cdivx = 0;
 // number of cylindrical Y Divisions (mutually exclusive to Linear Compartments)
@@ -52,13 +61,17 @@ cdivy = 0;
 // orientation
 c_orientation = 2; // [0: x direction, 1: y direction, 2: z direction]
 // diameter of cylindrical cut outs
-cd = 10;
+cd = [2.5, 3.9, 4.9, 6.75, 8.35, 12.5]; // [0.01:20]
 // cylinder height
 ch = 1;
 // spacing to lid
 c_depth = 1;
 // chamfer around the top rim of the holes
 c_chamfer = 0.5;
+// chamfer around the top rim of the holes
+c_style = "circle"; // [circle,square,hexagon]
+// chamfer around the top rim of the holes
+c_depth_style = "lid"; // [lid,bottom]
 
 /* [Height] */
 // determine what the variable "gridz" applies to based on your use case
@@ -74,7 +87,7 @@ style_tab = 1; //[0:Full,1:Auto,2:Left,3:Center,4:Right,5:None]
 // how should the top lip act
 style_lip = 0; //[0: Regular lip, 1:remove lip subtractively, 2: remove lip and retain height]
 // scoop weight percentage. 0 disables scoop, 1 is regular scoop. Any real number will scale the scoop.
-scoop = 1; //[0:0.01:1]
+scoop = 1; //[0:0.01:2]
 // only cut magnet/screw holes at the corners of the bin to save uneccesary print time
 only_corners = false;
 
@@ -89,7 +102,7 @@ include <gridfinity-rebuilt-utility.scad>
 
 // ===== IMPLEMENTATION ===== //
 
-color("lightgrey")
+//color("lightgrey")
 {
     gridfinityInit(gridx, gridy, height(gridz, gridz_define, style_lip, enable_zsnap), height_internal, sl=style_lip) {
         if (divx.x > 0 && divy.x > 0) {
@@ -101,7 +114,7 @@ color("lightgrey")
             // cut(22/12, 0, 7/12, 1, style_tab, tab_height=d_tabh*tabh);
             // cut(29/12, 0, 7/12, 1, style_tab, tab_height=d_tabh*tabh);
         } else if (cdivx > 0 && cdivy > 0) {
-            cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, coutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer);
+            cutCylinders(n_divx=cdivx, n_divy=cdivy, cylinder_diameter=cd, cylinder_height=ch, cutout_depth=c_depth, orientation=c_orientation, chamfer=c_chamfer, style=c_style);
         }
     }
     

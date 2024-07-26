@@ -57,7 +57,7 @@ enable_pinch | boolean | toggles an outside pinch at the top lip of the bin. <br
 gridz_define | { n>0 \| n∈R } | determine what the variable "gridz" applies to based on <br> your use case. default: 0. <br>     • (0) gridz is the height in # of 7mm increments (Zack) <br>     • (1) gridz is the internal height in mm <br>     • (2) gridz is the overall external height of the bin in mm
 style_tab | { 0, 1, 2, 3, 4, 5 } | how the tabs for labels are generated. <br>     • (0) Full tabs across the entire compartment <br>     • (1) automatic tabs <br>     - left aligned tabs on the left edge<br>     - right aligned tabs on right edge<br>     -  center tabs otherwise <br>     • (2) left aligned tabs <br>     • (3) center aligned tabs <br>     • (4) right aligned tabs <br>     • (5) no tabs
 style_base | { 0, 1, 2, 3, 4} | specifies the locations for the "X" cutouts for bases. <br>     • (0) all <br>     • (1) corners <br>     • (2) edges <br>     • (3) automatic <br>     • (4) none
-a_tab | { n>0 \| n∈R } | angle of the tab
+overhang_angle() | { n>0 \| n∈R } | angle of the tab
 
 ## Modules
 

@@ -1,5 +1,11 @@
-//d_wall = 0.95;
+d_wall = 0.95;
 build_baseplate = false;
+Nozzle = 0.4;
+Layer_Height = 0.2;
+
+function nozzle() = Nozzle;
+function layer_height() = Layer_Height;
+function bin_bottom_thickness() = standard_h_bot;
 
 include <gridfinity-rebuilt-utility.scad>
 include <standard.scad>

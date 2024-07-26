@@ -16,7 +16,7 @@ r_hole1| screw hole radius
 r_hole2| magnet hole radius
 d_hole| center-to-center distance between holes
 h_hole| magnet hole depth
-h_slit| slit depth (printer layer height)
+layer_height()| slit depth (printer layer height)
 r_f1| top edge fillet radius
 r_f2 | internal fillet radius
 d_div | width of divider between compartments
@@ -24,7 +24,7 @@ d_wall| minimum wall thickness
 d_clear| tolerance fit factor
 d_tabh| height of tab (yaxis, measured from inner wall)
 d_tabw| maximum width of tab
-a_tab| angle of tab
+overhang_angle()| angle of tab
 bp_h_bot| Baseplate bottom part height (part added with weigthed=true)
 bp_cut_size| Baseplate bottom cutout rectangle size
 bp_cut_depth| Baseplate bottom cutout rectangle depth

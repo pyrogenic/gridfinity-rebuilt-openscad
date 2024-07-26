@@ -29,7 +29,7 @@ function fromGridfinityUnits(gridfinityUnit, includeLipHeight = false) =
  * @returns The final value in mm.
  */
 function includingFixedHeights(mmHeight, includeLipHeight = false) =
-    mmHeight + h_bot + h_base + (includeLipHeight ? h_lip : 0);
+    mmHeight + bin_bottom_thickness() + h_base + (includeLipHeight ? h_lip : 0);
 
 /**
  * @brief Three Functions in One. For height calculations.
@@ -108,10 +108,11 @@ module _cutProgression(x, extra_w, i, n_divx, n_divy, style_tab, scoop_weight, t
 //         set n_div values to 0 for a solid bin
 // cylinder_diameter: diameter of cutouts
 // cylinder_height: height of cutouts
-// coutout_depth: offset from top to solid part of container
+// cutout_depth: offset from top to solid part of container
 // orientation: orientation of cylinder cutouts (0 = x direction, 1 = y direction, 2 = z direction)
 // chamfer: chamfer around the top rim of the holes
-module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, coutout_depth=0, orientation=0, chamfer=0.5) {
+// style: 
+module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, cutout_depth=0, orientation=0, chamfer=0.5, style="circle") {
     rotation = (orientation == 0)
             ? [0,90,0]
             : (orientation == 1)
@@ -123,17 +124,39 @@ module cutCylinders(n_divx=1, n_divy=1, cylinder_diameter=1, cylinder_height=1, 
     padding = 2;
     cutout_x = gridx_mm - d_wall()*2;
     cutout_y = gridy_mm - d_wall()*2;
+    cutout_depth = cutout_depth >= 0 ? cutout_depth : $dh - cylinder_height;
 
     cut_move(x=0, y=0, w=$gxx, h=$gyy) {
-        translate([0,0,-coutout_depth]) {
-            rounded_rectangle(cutout_x, cutout_y, coutout_depth*2, r_base);
+        translate([0,0,-cutout_depth]) {
+            rounded_rectangle(cutout_x, cutout_y, cutout_depth*2, r_base);
 
             pattern_linear(x=n_divx, y=n_divy, sx=(gridx_mm - padding)/n_divx, sy=(gridy_mm - padding)/n_divy)
                 rotate(rotation)
+                let(cylinder_diameter=is_num(cylinder_diameter) ? cylinder_diameter : lerp(cylinder_diameter, pattern_linear_f()))
+                    
                     union() {
-                        cylinder(d=cylinder_diameter, h=cylinder_height*2, center=true);
+                        echo(str(pattern_linear_in(), ": cylinder_diameter = ", cylinder_diameter));
+                        if (style == "circle")
+                            cylinder(d=cylinder_diameter, h=cylinder_height*2, center=true);
+                        else if (style == "square")
+                            translate([0,0,-cylinder_height+0.01]) 
+                            linear_extrude(cylinder_height)
+                                square(cylinder_diameter, center=true);
+                        else if (style == "hexagon")
+                            cylinder(d=cylinder_diameter, h=cylinder_height*2, center=true, $fn=6);
                         if (chamfer > 0) {
-                            translate([0,0,-chamfer]) cylinder(d1=cylinder_diameter, d2=cylinder_diameter+4*chamfer, h=2*chamfer);
+                            if (style == "circle" || style == "hexagon")
+                                translate([0,0,-chamfer]) 
+                                    cylinder(d1=cylinder_diameter, d2=cylinder_diameter+4*chamfer, h=2*chamfer);
+                            else if (style == "square")
+                                hull() {
+                                    linear_extrude(0.01) 
+                                        square(cylinder_diameter + 2*chamfer, center=true);;
+                                    translate([0,0,-2*chamfer])
+                                        linear_extrude(0.01) 
+                                            square(cylinder_diameter, center=true);
+
+                                }
                         }
                     };
         }
@@ -243,33 +266,33 @@ module gridfinityBase(gx, gy, l, dx, dy, style_hole, off=0, final_cut=true, only
 
     if (final_cut)
     translate([0,0,h_base])
-    rounded_rectangle(xx+0.002, yy+0.002, h_bot/1.5, r_fo1+0.001);
+    rounded_rectangle(xx+0.002, yy+0.002, bin_bottom_thickness()/1.5, r_fo1+0.001);
 
     intersection(){
         if (final_cut)
         translate([0,0,-1])
-        rounded_rectangle(xx+0.005, yy+0.005, h_base+h_bot/2*10, r_fo1+0.001);
+        rounded_rectangle(xx+0.005, yy+0.005, h_base+bin_bottom_thickness()/2*10, r_fo1+0.001);
 
         if((style_hole != 0) && (only_corners)) {
             difference(){
                 pattern_linear(gx/dbnx, gy/dbny, dbnx*l, dbny*l)
                 block_base(gx, gy, l, dbnx, dbny, 0, off);
                 if (style_hole == 4) {
-                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, layer_height()*2])
                     refined_hole();
                     mirror([1, 0, 0])
-                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                    translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, layer_height()*2])
                     refined_hole();
                     mirror([0, 1, 0]) {
-                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, layer_height()*2])
                         refined_hole();
                         mirror([1, 0, 0])
-                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, h_slit*2])
+                        translate([(gx/2)*l_grid - d_hole_from_side, (gy/2) * l_grid - d_hole_from_side, layer_height()*2])
                         refined_hole();
                     }
                 }
                 else {
-                    pattern_linear(2, 2, (gx-1)*l_grid+d_hole, (gy-1)*l_grid+d_hole)
+                    pattern_linear(2, 2, (gx-1)*l_grid+d_hole, (gy-1)*l_grid+d_hole, [0, -90, 90, 180])
                     block_base_hole(style_hole, off);
                 }
             }
@@ -299,7 +322,7 @@ module block_base(gx, gy, l, dbnx, dbny, style_hole, off) {
         if (style_hole > 0)
             pattern_circular(abs(l-d_hole_from_side/2)<0.001?1:4)
             if (style_hole == 4)
-                translate([l/2-d_hole_from_side, l/2-d_hole_from_side, h_slit*2])
+                translate([l/2-d_hole_from_side, l/2-d_hole_from_side, layer_height()*2])
                 refined_hole();
             else
                 translate([l/2-d_hole_from_side, l/2-d_hole_from_side, 0])
@@ -330,7 +353,7 @@ module block_base_solid(dbnx, dbny, l, o) {
         hull() {
             rounded_rectangle(xx-2*r_c2+o, yy-2*r_c2+o, r_c2, r_fo2);
             mirror([0,0,1])
-            rounded_rectangle(xx+o, yy+o, h_bot/2+abs(10*o), r_fo1);
+            rounded_rectangle(xx+o, yy+o, bin_bottom_thickness()/2+abs(10*o), r_fo1);
         }
     }
 }
@@ -340,11 +363,21 @@ module block_base_hole(style_hole, o=0) {
     r2 = r_hole2-o/2;
     union() {
         difference() {
-            cylinder(h = 2*(h_hole-o+(style_hole==3?h_slit:0)), r=r2, center=true);
+            union(){
+                translate([nozzle()*2, nozzle()*2]) 
+                cylinder(h = layer_height(), r=r2+nozzle()*2, center=true);
+                translate([nozzle(), nozzle()]) 
+                cylinder(h = layer_height()*2, r=r2+nozzle(), center=true);
+                cylinder(h = 2*(h_hole-o+(style_hole==3?layer_height()*2:0)), r=r2, center=true);
+            }
 
             if (style_hole==3)
             copy_mirror([0,1,0])
             translate([-1.5*r2,r1+0.1,h_hole-o])
+            cube([r2*3,r2*3, 10]);
+            copy_mirror([1,0,0])
+            rotate([0,0,90]) 
+            translate([-1.5*r2,r1+0.1,h_hole-o + layer_height()])
             cube([r2*3,r2*3, 10]);
         }
         if (style_hole > 1)
@@ -367,7 +400,7 @@ module refined_hole() {
     mh = m-0.1;
 
     // Poke through - For removing a magnet using a toothpick
-    ptl = h_slit*3; // Poke Through Layers
+    ptl = layer_height()*3; // Poke Through Layers
     pth = mh+ptl; // Poke Through Height
     ptr = 2.5; // Poke Through Radius
 
@@ -477,20 +510,21 @@ module cut_move_unsafe(x, y, w, h) {
     children();
 }
 
+// s - scoop
 module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
 
     v_len_tab = tab_height;
     v_len_lip = d_wall2-d_wall()+1.2;
-    v_cut_tab = tab_height - (2*r_f1)/tan(a_tab);
+    v_cut_tab = tab_height - (2*r_f1)/tan(overhang_angle());
     v_cut_lip = d_wall2-d_wall()-d_clear;
-    v_ang_tab = a_tab;
+    v_ang_tab = overhang_angle();
     v_ang_lip = 45;
 
     ycutfirst = y == 0 && $style_lip == 0;
     ycutlast = abs(y+h-$gyy)<0.001 && $style_lip == 0;
     xcutfirst = x == 0 && $style_lip == 0;
     xcutlast = abs(x+w-$gxx)<0.001 && $style_lip == 0;
-    zsmall = ($dh+h_base)/7 < 3;
+    zsmall = t == 1 && ($dh+h_base)/7 < 3;
 
     ylen = h*($gyy*l_grid+(d_magic()))/$gyy-d_div;
     xlen = w*($gxx*l_grid+(d_magic()))/$gxx-d_div;
@@ -502,7 +536,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
     cut = (zsmall || t == 5) ? (ycutlast?v_cut_lip:0) : v_cut_tab;
     style = (t > 1 && t < 5) ? t-3 : (x == 0 ? -1 : xcutlast ? 1 : 0);
 
-    translate([0,ylen/2,h_base+h_bot])
+    translate([0,ylen/2,h_base+bin_bottom_thickness()])
     rotate([90,0,-90]) {
 
     if (!zsmall && xlen - tab_width > 4*r_f2 && (t != 0 && t != 5)) {
@@ -510,7 +544,7 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
         difference() {
             transform_tab(style, xlen, ((xcutfirst&&style==-1)||(xcutlast&&style==1))?v_cut_lip:0, tab_width)
             translate([ycutlast?v_cut_lip:0,0])
-            profile_cutter(height-h_bot, ylen/2, s);
+            profile_cutter(height-bin_bottom_thickness(), ylen/2, s);
 
             if (xcutfirst)
             translate([0,0,(xlen/2-r_f2)-v_cut_lip])
@@ -526,23 +560,23 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
             transform_tab(style, xlen, ((xcutfirst&&style==-1)||(xcutlast&&style==1)?v_cut_lip:0), tab_width)
             difference() {
                 intersection() {
-                    profile_cutter(height-h_bot, ylen-extent, s);
-                    profile_cutter_tab(height-h_bot, v_len_tab, v_ang_tab);
+                    profile_cutter(height-bin_bottom_thickness(), ylen-extent, s);
+                    profile_cutter_tab(height-bin_bottom_thickness(), v_len_tab, v_ang_tab);
                 }
-                if (ycutlast) profile_cutter_tab(height-h_bot, v_len_lip, 45);
+                if (ycutlast) profile_cutter_tab(height-bin_bottom_thickness(), v_len_lip, 45);
             }
 
             if (xcutfirst)
             translate([ylen/2,0,xlen/2])
             rotate([0,90,0])
             transform_main(2*ylen)
-            profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+            profile_cutter_tab(height-bin_bottom_thickness(), v_len_lip, v_ang_lip);
 
             if (xcutlast)
             translate([ylen/2,0,-xlen/2])
             rotate([0,-90,0])
             transform_main(2*ylen)
-            profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+            profile_cutter_tab(height-bin_bottom_thickness(), v_len_lip, v_ang_lip);
         }
     }
 
@@ -551,21 +585,21 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
     translate([0,0,xcutfirst?-v_cut_lip/2:0])
     transform_main(xlen-(xcutfirst?v_cut_lip:0)-(xcutlast?v_cut_lip:0))
     translate([cut,0])
-    profile_cutter(height-h_bot, ylen-extent-cut-(!s&&ycutfirst?v_cut_lip:0), s);
+    profile_cutter(height-bin_bottom_thickness(), ylen-extent-cut-(!s&&ycutfirst?v_cut_lip:0), s);
 
-    fillet_cutter(0,"hotpink")
+    fillet_cutter(0, "hotpink")
     difference() {
         transform_main(xlen)
         difference() {
-            profile_cutter(height-h_bot, ylen-extent, s);
+            profile_cutter(height-bin_bottom_thickness(), ylen-extent, s);
 
             if (!((zsmall || t == 5) && !ycutlast))
-            profile_cutter_tab(height-h_bot, tab, ang);
+            profile_cutter_tab(height-bin_bottom_thickness(), tab, ang);
 
             if (!(abs(s) > 0)&& y == 0)
             translate([ylen-extent,0,0])
             mirror([1,0,0])
-            profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+            profile_cutter_tab(height-bin_bottom_thickness(), v_len_lip, v_ang_lip);
         }
 
         if (xcutfirst)
@@ -573,14 +607,14 @@ module block_cutter(x,y,w,h,t,s,tab_width=d_tabw,tab_height=d_tabh) {
         translate([ylen/2+0.001,0,xlen/2+0.001])
         rotate([0,90,0])
         transform_main(2*ylen)
-        profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+        profile_cutter_tab(height-bin_bottom_thickness(), v_len_lip, v_ang_lip);
 
         if (xcutlast)
         color("indigo")
         translate([ylen/2+0.001,0,-xlen/2+0.001])
         rotate([0,-90,0])
         transform_main(2*ylen)
-        profile_cutter_tab(height-h_bot, v_len_lip, v_ang_lip);
+        profile_cutter_tab(height-bin_bottom_thickness(), v_len_lip, v_ang_lip);
     }
 
     }
@@ -601,11 +635,12 @@ module transform_tab(type, xlen, cut, tab_width=d_tabw) {
     children();
 }
 
-module fillet_cutter(t = 0, c = "goldenrod") {
+module fillet_cutter(t = 0, c = "goldenrod", r=undef) {
     color(c)
     minkowski() {
         children();
-        sphere(r = r_f2-t/1000);
+        let(r=is_undef(r) ? r_f2-t/1000 : r)
+        sphere(r = r);
     }
 }
 
@@ -625,8 +660,12 @@ module profile_cutter(h, l, s) {
             square(0.1);
         }
         difference() {
-            translate([l-scoop-2*r_f2, scoop])
+            //let(stretch=((h-5)/scoop))
+            let(stretch=1)
+            translate([l-scoop-2*r_f2, stretch * scoop])
             if (scoop != 0) {
+                translate([0, 0]) 
+                scale([1, stretch]) 
                 intersection() {
                     circle(scoop);
                     mirror([0,1]) square(2*scoop);

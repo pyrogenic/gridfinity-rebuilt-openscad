@@ -6,7 +6,7 @@ r_c1 = 0.8;
 // upper base chamfer "radius"
 r_c2 = 2.4;
 // bottom thiccness of bin
-h_bot = 2.2;
+standard_h_bot = 2.2;
 // outside radii 1
 r_fo1 = 7.5 / 2;
 // outside radii 2
@@ -32,7 +32,7 @@ d_hole_from_side=8;
 // magnet hole depth
 h_hole = 2.4;
 // slit depth (printer layer height)
-h_slit = 0.2;
+//layer_height() = 0.2;
 
 // top edge fillet radius
 r_f1 = 0.6;

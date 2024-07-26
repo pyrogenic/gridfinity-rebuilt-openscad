@@ -61,7 +61,7 @@ style_tab = 0; // [0:continuous, 1:broken, 2:auto, 3:right, 4:center, 5:left, 6:
 style_base = 0; // [0:all, 1:corners, 2:edges, 3:auto, 4:none]
 
 // tab angle
-a_tab = 40;
+overhang_angle() = 40;
 
 // ===== IMPLEMENTATION ===== //
 
@@ -460,7 +460,7 @@ module block_flushscoop() {
 module profile_tab() {
     union() {
         copy_mirror([0,1,0])
-        polygon([[0,0],[d_tabh*cos(a_tab),0],[d_tabh*cos(a_tab),d_tabh*sin(a_tab)]]);
+        polygon([[0,0],[d_tabh*cos(overhang_angle()),0],[d_tabh*cos(overhang_angle()),d_tabh*sin(overhang_angle())]]);
     }
 }
 
@@ -469,16 +469,16 @@ module profile_tabscoop(m) {
 }
 
 module block_tabscoop(a=m, b=0, c=0, d=-1) {
-    translate([0,d_tabh*cos(a_tab)-l_grid*gridy/2+0.25+b,0])
+    translate([0,d_tabh*cos(overhang_angle())-l_grid*gridy/2+0.25+b,0])
     difference() {
-        translate([0,0,-d_tabh*sin(a_tab)*2+d_height+2.1])
+        translate([0,0,-d_tabh*sin(overhang_angle())*2+d_height+2.1])
         profile_tabscoop(a);
 
         translate([-gridx*l_grid/2,-m,-m])
-        cube([gridx*l_grid,m-d_tabh*cos(a_tab)+0.005+c,d_height*20]);
+        cube([gridx*l_grid,m-d_tabh*cos(overhang_angle())+0.005+c,d_height*20]);
 
         if (d >= 0)
-        translate([0,0,-d_tabh*sin(a_tab)+d_height+m/2+d+2.1])
+        translate([0,0,-d_tabh*sin(overhang_angle())+d_height+m/2+d+2.1])
         cube([gridx*l_grid,gridy*l_grid,m],center=true);
     }
 }
@@ -489,7 +489,7 @@ module transform_vtab(a=0,b=1) {
 }
 
 module transform_vtab_base(a) {
-    translate([0,d_tabh*cos(a_tab)-l_grid*gridy/2+0.25,-d_tabh*sin(a_tab)+d_height+2.1])
+    translate([0,d_tabh*cos(overhang_angle())-l_grid*gridy/2+0.25,-d_tabh*sin(overhang_angle())+d_height+2.1])
     rotate([90,0,270])
     linear_extrude(a, center=true)
     children();
@@ -504,8 +504,8 @@ module block_tab_base(del) {
     offset(delta = del)
     union() {
         profile_tab();
-        translate([d_tabh*cos(a_tab),-d_tabh*sin(a_tab),0])
-        square([l_grid,d_tabh*sin(a_tab)*2]);
+        translate([d_tabh*cos(overhang_angle()),-d_tabh*sin(overhang_angle()),0])
+        square([l_grid,d_tabh*sin(overhang_angle())*2]);
     }
 }
 
